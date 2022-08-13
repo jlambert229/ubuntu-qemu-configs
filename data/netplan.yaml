@@ -1,0 +1,55 @@
+
+network:
+  version: 2
+  ethernets:
+    # nic - mgmt
+    enp0s25:
+      dhcp4: false
+    ens_ports:
+      match:
+        name: ens*
+  bonds:
+    # ----------------------
+    # Bond interface for VMs
+    # ----------------------
+    bond0:
+      interfaces: [ens_ports]
+      parameters:
+        mode: 802.3ad
+        lacp-rate: fast
+        mii-monitor-interval: 100
+  bridges:
+    br110:
+      interfaces: [bond0.110]
+      dhcp4: no
+      parameters:
+        forward-delay: 0
+        stp: true
+
+  vlans:
+    bond0.110:
+      id: 110
+      link: bond0
+    # ----------------------
+    # mgmt interfaces
+    # ----------------------
+    enp0s25.110:
+      addresses:
+        - 10.1.110.15/24
+      gateway4: 10.1.110.254
+      id: 110
+      link: enp0s25
+      nameservers:
+        addresses:
+          - 10.1.100.11
+        search: []
+    # mgmt interface - vlan 100
+    enp0s25.100:
+      addresses:
+        - 10.1.100.15/24
+      id: 100
+      link: enp0s25
+      nameservers:
+        addresses:
+          - 10.1.100.11
+        search: []
